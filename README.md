@@ -4,24 +4,6 @@ A Terraform module that implements Blue-Green deployment using AWS CodeDeploy as
 Learn more in the [AWS CodeDeploy Guides Series](https://medium.com/@senora-dev).
 
 ## Usage
-- Edit the Buildspec.yaml file in the CodeBuild stage of your CodePipeline (the stage before CodeDeploy) to include the AppSpec file:
-```
-version: 0.2
-phases:
-  build:
-    commands:
-      - ...
-  post_build: 
-    commands: 
-      - ...
-artifacts: 
-  files:
-    - appspec.yml
-    - ...
-  discard-paths: yes
-```
-***When working with CodePipeline and CodeBuild, the 'files' section in Buildspec.yaml is used to transfer the AppSpec or other files needed for the next stage of the pipeline.***
-- Add CodeDeploy module to your Terraform:
 ```terraform
 module "codedeploy"{
     source  = "Senora-dev/codedeploy/aws"
@@ -37,7 +19,7 @@ module "codedeploy"{
     load_balancer_green_target_group = "my-green-tg-name"
 }
 ```
-- Use the CodeDeploy that you created as a stage in your CodePipeline. (As a CD stage after the CI stage).
+***After applying the changes, make sure to add CodeDeploy as a stage in CodePipeline. The CI stage (defined in buildspec.yaml) should pass Appspec.yaml through the 'artifacts' section.***
 
 ## Contributing
 Contributions to this project are welcome! Feel free to submit issues, feature requests, or pull requests to help improve the self-service backend.

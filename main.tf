@@ -1,5 +1,5 @@
 resource "aws_codedeploy_app" "codedeploy_app" {
-  name = "codedeploy-${var.app_name}"
+  name = "codedeploy-${local.app_name}"
   compute_platform = "ECS"
 }
 
@@ -7,7 +7,7 @@ resource "aws_codedeploy_app" "codedeploy_app" {
 resource "aws_codedeploy_deployment_group" "deployment_group" {
   app_name               = aws_codedeploy_app.codedeploy_app.name
   deployment_config_name = "CodeDeployDefault.ECSAllAtOnce"
-  deployment_group_name  = "ecs-deployment-group-${var.app_name}"
+  deployment_group_name  = "ecs-deployment-group-${local.app_name}"
   service_role_arn       = aws_iam_role.codedeploy_role.arn
 
   auto_rollback_configuration {
@@ -39,26 +39,26 @@ resource "aws_codedeploy_deployment_group" "deployment_group" {
   load_balancer_info {
     target_group_pair_info {
       prod_traffic_route {
-        listener_arns = [var.load_balancer_listener_arn]
+        listener_arns = [var.alb_listener_arn]
       }
 
       test_traffic_route {
-        listener_arns = [var.load_balancer_test_listener_arn]
+        listener_arns = [var.alb_test_listener_arn]
       }
 
       target_group {
-        name = var.load_balancer_blue_target_group 
+        name = var.alb_tg_blue_name
       }
 
       target_group {
-        name = var.load_balancer_green_target_group 
+        name = var.alb_tg_green_name
       }
     }
   }
 }
 
 resource "aws_iam_role" "codedeploy_role" {
-  name = "iam-role-codedeploy-${var.app_name}"
+  name = "iam-role-codedeploy-${local.app_name}"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -76,7 +76,7 @@ resource "aws_iam_role" "codedeploy_role" {
 }
 
 resource "aws_iam_role_policy" "cloudWatch_policy" {
-  name = "iam-policy-cloudwatch-${var.app_name}"
+  name = "iam-policy-cloudwatch-${local.app_name}"
   role = aws_iam_role.codedeploy_role.id
 
   # Terraform's "jsonencode" function converts a
@@ -98,7 +98,7 @@ resource "aws_iam_role_policy" "cloudWatch_policy" {
 }
 
 resource "aws_iam_role_policy" "ecs_policy" {
-  name = "iam-policy-ecs-${var.app_name}"
+  name = "iam-policy-ecs-${local.app_name}"
   role = aws_iam_role.codedeploy_role.id
   policy = data.aws_iam_policy_document.codedeploy_role_policy.json
 }

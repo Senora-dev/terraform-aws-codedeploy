@@ -1,28 +1,79 @@
-# terraform-aws-codedeploy  [![Senora](https://github.com/Senora-dev/assets/blob/main/senora-logo.png?raw=true)](https://senora.dev)
-A Terraform module that implements Blue-Green deployment using AWS CodeDeploy as part of a AWS CodePipeline pipeline.
+# AWS CodeDeploy Terraform Module
 
-Learn more in the [AWS CodeDeploy Guides Series](https://medium.com/@senora-dev).
+This Terraform module creates an AWS CodeDeploy application and deployment group for ECS services with blue/green deployment capabilities.
+
+## Features
+
+- CodeDeploy application for ECS services
+- Blue/Green deployment configuration
+- Automatic rollback on deployment failure
+- Traffic routing through Application Load Balancer
+- IAM roles and policies for CodeDeploy
+- CloudWatch logging integration
+- ECS service integration
+- Lambda execution permissions
 
 ## Usage
-```terraform
-module "codedeploy"{
-    source  = "Senora-dev/codedeploy/aws"
-    version = "~>1.0.0"
 
-    app_name = "my-app-name"
-    s3_bucket = "codepipeline-bucket-name"
-    ecs_cluster_name = "my-app-cluster-name"
-    ecs_cluster_name = "my-app-ecs-sevrice-name"
-    load_balancer_listener_arn = "${data.my_alb_listener_arn}"
-    load_balancer_test_listener_arn = "${data.my_test_listener_arn}"
-    load_balancer_blue_target_group = "my-blue-tg-name"
-    load_balancer_green_target_group = "my-green-tg-name"
+```hcl
+module "codedeploy" {
+  source = "path/to/module"
+
+  app_name = "my-app"
+  ecs_cluster_name = "my-cluster"
+  ecs_service_name = "my-service"
+  
+  load_balancer_listener_arn = "arn:aws:elasticloadbalancing:region:account:listener/app/alb/1234567890abcdef/1234567890abcdef"
+  load_balancer_test_listener_arn = "arn:aws:elasticloadbalancing:region:account:listener/app/alb/1234567890abcdef/0987654321fedcba"
+  
+  load_balancer_blue_target_group = "blue-tg"
+  load_balancer_green_target_group = "green-tg"
+  
+  termination_wait_time_in_minutes = 120
 }
 ```
-***After applying the changes, make sure to add CodeDeploy as a stage in CodePipeline. The CI stage (defined in buildspec.yaml) should pass Appspec.yaml through the 'artifacts' section.***
 
-## Contributing
-Contributions to this project are welcome! Feel free to submit issues, feature requests, or pull requests to help improve the self-service backend.
+## Requirements
+
+| Name | Version |
+|------|---------|
+| terraform | >= 1.0 |
+| aws | >= 4.0 |
+
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| app_name | Name of the application | `string` | n/a | yes |
+| ecs_cluster_name | Name of the ECS cluster | `string` | n/a | yes |
+| ecs_service_name | Name of the ECS service | `string` | n/a | yes |
+| load_balancer_listener_arn | ARN of the production listener | `string` | n/a | yes |
+| load_balancer_test_listener_arn | ARN of the test listener | `string` | n/a | yes |
+| load_balancer_blue_target_group | Name of the blue target group | `string` | n/a | yes |
+| load_balancer_green_target_group | Name of the green target group | `string` | n/a | yes |
+| termination_wait_time_in_minutes | Time to wait before terminating old instances | `number` | `120` | no |
+
+## Outputs
+
+| Name | Description |
+|------|-------------|
+| codedeploy_app_name | Name of the CodeDeploy application |
+| codedeploy_deployment_group_name | Name of the deployment group |
+| codedeploy_role_arn | ARN of the CodeDeploy IAM role |
+
+## Notes
+
+- The module creates a CodeDeploy application specifically for ECS services
+- Blue/Green deployment is configured with traffic routing through an ALB
+- Automatic rollback is enabled for failed deployments
+- The module creates necessary IAM roles and policies for CodeDeploy
+- CloudWatch logging is configured for deployment monitoring
+- Lambda execution permissions are attached to the CodeDeploy role
 
 ## License
-This project is licensed under the [Apache 2.0 License](LICENSE).
+
+MIT Licensed. See LICENSE for full details.
+
+## Maintainers
+
+This module is maintained by [Senora.dev](https://senora.dev). 

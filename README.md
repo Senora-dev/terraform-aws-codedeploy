@@ -17,7 +17,7 @@ This Terraform module creates an AWS CodeDeploy application and deployment group
 
 ```hcl
 module "codedeploy" {
-  source = "path/to/module"
+  source = "Senora-dev/codedeploy/aws"
 
   app_name = "my-app"
   ecs_cluster_name = "my-cluster"
